@@ -1,0 +1,7 @@
+/.ve/
+/.project
+/.pydevproject
+/.cache/
+/.tox/
+/django_cobertura_report_merger.egg-info/
+*.pyc
