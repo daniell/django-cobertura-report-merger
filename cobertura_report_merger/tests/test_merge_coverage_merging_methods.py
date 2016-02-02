@@ -11,8 +11,9 @@ from ..management.commands.merge_coverage_files import (
     merge_packages,
 )
 from .helper_methods import (
-    get_method_tree, get_class_tree, get_package_tree
+    get_class_tree, get_method_tree, get_package_tree, get_sources_tree
 )
+from cobertura_report_merger.management.commands.merge_coverage_files import merge_sources
 
 
 def test_merging_lines_combines_hits_for_equivalent_lines():
@@ -151,3 +152,29 @@ def test_merge_xml_calls_merge_once(merge_command):
 
     merge_coverage_files_command.merge_xml(report1_path, report2_path, ContentFile(''))
     assert 1 == merge_command.call_count
+
+
+def test_merge_sources_merges_sources():
+    sources_tree_1 = get_sources_tree('/test/directory/1/')
+    sources_tree_2 = get_sources_tree('/test/directory/2/')
+
+    expected_sources = list(sources_tree_1.findall('source') + sources_tree_2.findall('source'))
+
+    merge_sources(sources_tree_1, sources_tree_2)
+
+    assert expected_sources == list(sources_tree_1)
+
+
+@patch('cobertura_report_merger.management.commands.merge_coverage_files.merge_sources')
+def test_merge_xml_calls_merge_sources(merge_command):
+    merge_coverage_files_command = Command()
+
+    coverage_path = os.path.join(os.path.dirname(__file__), 'sample_coverage_reports')
+
+    merge_coverage_files_command.path = coverage_path
+    report1_path = os.path.join(coverage_path, 'cobertura-coverage.xml')
+    report2_path = os.path.join(coverage_path, 'coverage.xml')
+
+    merge_coverage_files_command.merge_xml(report1_path, report2_path, ContentFile(''))
+    assert 1 == merge_command.call_count
+

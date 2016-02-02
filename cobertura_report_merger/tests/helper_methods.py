@@ -75,6 +75,12 @@ def get_package_tree():
     return package_element
 
 
+def get_sources_tree(path):
+    sources_root = ET.Element('sources')
+    sources_root.append(ET.Element('source', text=path))
+    return sources_root
+
+
 def mock_out_unwanted_methods(command, method_names):
     for name in method_names:
         setattr(command, name, Mock())

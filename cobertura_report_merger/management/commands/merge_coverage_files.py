@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 # Based on https://gist.githubusercontent.com/tgsoverly/ef975d5b430fbce1eb33/raw/a4836655814bf09ac34bd42a6dd99f37aea7265d/merge-xml-coverage.py on 01/12/2015
 # constants
+SOURCES_ROOT = 'sources'
 PACKAGES_LIST = 'packages/package'
 PACKAGES_ROOT = 'packages'
 CLASSES_LIST = 'classes/class'
@@ -102,6 +103,14 @@ def merge_lines(line1, line2):
             line1[0] = line2[0]
 
     return line1
+
+
+def merge_sources(sources_list_1, sources_list_2):
+    for item in sources_list_2:
+        if item not in sources_list_1:
+            sources_list_1.append(item)
+
+    return sources_list_1
 
 
 class Command(BaseCommand):
@@ -249,13 +258,17 @@ class Command(BaseCommand):
         xml1 = ET.parse(xmlfile1)
         xml2 = ET.parse(xmlfile2)
 
+
         # get packages
         packages1 = self.filter_xml(xml1)
         packages2 = self.filter_xml(xml2)
 
         # find root
+        sources_list_1 = xml1.find(SOURCES_ROOT)
+        sources_list_2 = xml1.find(SOURCES_ROOT)
         packages1root = xml1.find(PACKAGES_ROOT)
 
+        merge_sources(sources_list_1, sources_list_2)
         # merge packages
         merge(packages1root, packages1, packages2, 'name', merge_packages)
 
